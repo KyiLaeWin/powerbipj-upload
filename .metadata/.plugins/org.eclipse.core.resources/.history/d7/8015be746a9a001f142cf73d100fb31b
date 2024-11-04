@@ -1,0 +1,5 @@
+package com.upgpaint.powerbi.db.repository;
+
+public interface MaterialRepository {
+
+}

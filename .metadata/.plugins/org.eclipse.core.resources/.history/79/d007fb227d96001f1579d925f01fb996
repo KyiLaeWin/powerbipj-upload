@@ -1,0 +1,8 @@
+package com.upgpaint.powerbi.db.service;
+
+import com.upgpaint.powerbi.rest.domain.MMRestList;
+
+public class MMDBService {
+	public void createMM(MMRestList mmRestList );
+	  public void removeMM(long MaterialNumber);
+}

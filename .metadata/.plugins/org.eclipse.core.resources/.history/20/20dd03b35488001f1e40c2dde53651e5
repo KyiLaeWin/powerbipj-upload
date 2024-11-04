@@ -1,0 +1,26 @@
+package com.upgpaint.powerbi.db.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+
+import com.upgpaint.powerbi.db.entity.VBPAEntity;
+
+import jakarta.transaction.Transactional;
+
+@Repository("repository")
+public interface VBPARepository extends JpaRepository<VBPAEntity, Long>{
+	@Query("SELECT v FROM VBPAEntity v WHERE v.billingDocument = :billingDocument AND v.partner=:partner")
+    public VBPAEntity findVBPA(@Param("billingDocument")long billingDocument,@Param("partner")String partner);
+	 
+
+
+	 @Modifying
+	 @Query("DELETE FROM VBPAEntity v WHERE v.billingDocument = :billingDocument ")
+	 public void DeleteByBillDOc(@Param("billingDocument")Long billingDocument);
+
+	
+}

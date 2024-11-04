@@ -1,0 +1,116 @@
+package com.upgpaint.powerbi.db.service.impl;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.upgpaint.powerbi.db.entity.SalesVolume;
+import com.upgpaint.powerbi.db.repository.SalesVolumeRepository;
+import com.upgpaint.powerbi.db.service.SalesVolumeDbService;
+import com.upgpaint.powerbi.rest.domain.SalesVolumeRest;
+import com.upgpaint.powerbi.rest.domain.SalesVolumeRestList;
+
+@Service("salesVolumeDbService")
+@Transactional
+public class SalesVolumeDbServiceImpl extends AbstractDbServiceManagerImpl<SalesVolume, Long> implements SalesVolumeDbService{
+private static Logger log = LoggerFactory.getLogger(SalesVolumeDbServiceImpl.class);
+
+   private SalesVolumeRepository salesVolumeRepository;
+   DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+   
+
+   @Autowired
+   public SalesVolumeDbServiceImpl(@Qualifier("salesVolumeRepository") SalesVolumeRepository salesVolumeRepository) {
+        super(salesVolumeRepository);
+      this.salesVolumeRepository = salesVolumeRepository;
+   }
+
+   @Override
+   public void createSalesVolumeDetail(SalesVolumeRestList salesVolumeRestList) {
+       List<SalesVolumeRest> salesVolumeRest = salesVolumeRestList.getData().getResults();
+       LocalDate now = LocalDate.now();
+       LocalDate pastDate = now.minusDays(60);
+
+       // Step 1: Collect existing billing documents from incoming data
+       Set<Long> incomingBillingDocuments = new HashSet<>();
+       for (SalesVolumeRest salesVolumeRestItem : salesVolumeRest) {
+           incomingBillingDocuments.add(Long.parseLong(salesVolumeRestItem.getBill_Document()));
+       }
+
+       // Step 2: Delete records not in incoming data
+       List<SalesVolume> existingSalesVolumes = salesVolumeRepository.findAll(); // Fetch all existing records
+       
+       for (SalesVolume existingSalesVolume : existingSalesVolumes) {
+    	   LocalDate billingDate = LocalDate.parse(existingSalesVolume.getBillingDate(), formatter);
+           if (!incomingBillingDocuments.contains(existingSalesVolume.getBillingDocument()) && billingDate.isAfter(pastDate)) {
+               removeAllSalesVolumebyBillDov(existingSalesVolume.getBillingDocument());
+               log.info("Deleted sales volume with Billing document: {}", existingSalesVolume.getBillingDocument());
+           }
+       }
+
+       // Step 3: Process incoming records for insertion or update
+       for (SalesVolumeRest salesVolumeRestItem : salesVolumeRest) {
+           try {
+               SalesVolume existingSalesVolume = salesVolumeRepository.findSalesVolume(
+                   Long.parseLong(salesVolumeRestItem.getBill_Document()),
+                   salesVolumeRestItem.getMaterial()
+               );
+
+               LocalDate billingDate = LocalDate.parse(salesVolumeRestItem.getBilling_Date(), formatter);
+
+               if (existingSalesVolume == null) {
+                   SalesVolume salesVolume = new SalesVolume();
+                   populateSalesVolume(salesVolume, salesVolumeRestItem);
+                   this.save(salesVolume);
+                   log.info("Added new sales volume details with Billing document: {}", salesVolumeRestItem.getBill_Document());
+               
+               } 
+               else if (billingDate.isAfter(pastDate)) {
+                   log.info("Sales volume with Billing document {} already exists. Updating...", salesVolumeRestItem.getBill_Document());
+                   populateSalesVolume(existingSalesVolume, salesVolumeRestItem);
+                   this.save(existingSalesVolume); // Assuming save also updates if it exists
+               }
+           } catch (Exception e) {
+               log.error("Exception processing Sales volume with Billing document: {}", salesVolumeRestItem.getBill_Document(), e);
+           }
+       }
+   }
+
+
+
+   private void populateSalesVolume(SalesVolume salesVolume, SalesVolumeRest salesVolumeRestItem) {
+       salesVolume.setBillingDocument(Long.parseLong(salesVolumeRestItem.getBill_Document()));
+       salesVolume.setBillingCategory(salesVolumeRestItem.getBilling_Category());
+       salesVolume.setSalesGroup(salesVolumeRestItem.getSales_Group());
+       salesVolume.setSalesOffice(salesVolumeRestItem.getSales_Office());
+       salesVolume.setBillingDate(salesVolumeRestItem.getBilling_Date());
+       salesVolume.setRegion(salesVolumeRestItem.getRegion());
+       salesVolume.setDistChannel(salesVolumeRestItem.getDist_Channel());
+       salesVolume.setSalesOrg(salesVolumeRestItem.getSale_org());
+       salesVolume.setVolume(salesVolumeRestItem.getVolume());
+       salesVolume.setVolumeUnit(salesVolumeRestItem.getV_unit());
+       salesVolume.setMaterialNo(salesVolumeRestItem.getMaterial());
+       salesVolume.setPlant(salesVolumeRestItem.getPlant());
+       salesVolume.setStorageLoc(salesVolumeRestItem.getStorage_loc());
+       salesVolume.setNet_Value(salesVolumeRestItem.getNet_Value());
+       salesVolume.setRebateBasis(salesVolumeRestItem.getRebate_Basis());
+       salesVolume.setOutputTax(salesVolumeRestItem.getOutput_tax());
+       salesVolume.setCsd_point(salesVolumeRestItem.getCsdPoint());
+   }
+
+
+	@Override
+	public void removeAllSalesVolumebyBillDov(Long billingDocument) {
+		// TODO Auto-generated method stub
+		salesVolumeRepository.RemoveSalesVolumeByBillDOc(billingDocument);
+	}
+}

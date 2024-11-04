@@ -1,0 +1,59 @@
+Create table cost_center 
+CREATE TABLE `cost_center` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `CC_Group1` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `CC_Group1_Desc` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `CC_Group2` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `CC_Group2_Desc` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `CC_No` bigint(20) UNSIGNED NOT NULL,
+  `CC_Desc` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `CC_OrgUnit` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creator_id` bigint(20) NOT NULL,
+  `updater_id` bigint(20) NOT NULL,
+  `create_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `CC_NO_U1` (`CC_No`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `Salesvolume`(`id` BIGINT AUTO_INCREMENT PRIMARY KEY, 
+           `billing_document` VARCHAR(10)  COLLATE utf8mb4_unicode_ci NOT NULL, 
+           `billing_category` VARCHAR(1) COLLATE utf8mb4_unicode_ci DEFAULT NULL,     
+           `sales_group` VARCHAR(20)  COLLATE utf8mb4_unicode_ci DEFAULT NULL,  
+           `sales_office` VARCHAR(20)  COLLATE utf8mb4_unicode_ci DEFAULT NULL,    
+           `billing_date` DATE  COLLATE utf8mb4_unicode_ci NOT NULL,
+           `sales_org` VARCHAR(20)  COLLATE utf8mb4_unicode_ci NOT NULL,  
+           `region` VARCHAR(20)  COLLATE utf8mb4_unicode_ci DEFAULT NULL,   
+           `dist_channel` VARCHAR(20)  COLLATE utf8mb4_unicode_ci DEFAULT NULL,    
+           `volume` DECIMAL(15,3) COLLATE utf8mb4_unicode_ci NOT NULL,  
+           `volume_unit` VARCHAR(3) COLLATE utf8mb4_unicode_ci NOT NULL,    
+           `material_number` VARCHAR(18) COLLATE utf8mb4_unicode_ci NOT NULL,    
+           `plant` VARCHAR(20)  COLLATE utf8mb4_unicode_ci DEFAULT NULL,    
+           `storage_loc` VARCHAR(16)  COLLATE utf8mb4_unicode_ci DEFAULT NULL,    
+           `net_value` DECIMAL(15, 2) COLLATE utf8mb4_unicode_ci NOT NULL, 
+           `rebate_basis` DECIMAL(13, 2) COLLATE utf8mb4_unicode_ci NOT NULL, 
+           `output_tax` DECIMAL(13, 2) COLLATE utf8mb4_unicode_ci NOT NULL,     
+           `create_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,  
+           `update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+           ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; 
+           
+           
+           
+        LOAD DATA INFILE '/var/lib/mysql-files/Zsales.csv' INTO TABLE Salesvolume CHARACTER SET utf8mb4 FIELDS TERMINATED BY ','  LINES TERMINATED BY '\n'  IGNORE 1 ROWS; 
+        
+        CREATE TABLE `VBPA`(`id` BIGINT AUTO_INCREMENT PRIMARY KEY, 
+         `billing_document` VARCHAR(10)  COLLATE utf8mb4_unicode_ci NOT NULL,
+         `billing_date` DATE  COLLATE utf8mb4_unicode_ci NOT NULL,
+         `partner` VARCHAR(10)  COLLATE utf8mb4_unicode_ci NOT NULL,
+         `business_partner` VARCHAR(10) COLLATE utf8mb4_unicode_ci NOT NULL ,
+        `create_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,  
+        `update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; 
+           
+        
+ALTER TABLE Salesvolume
+MODIFY COLUMN billing_date varchar(255);
+
+select top *
+from Salesvolume
+order by id desc
+limit 10;

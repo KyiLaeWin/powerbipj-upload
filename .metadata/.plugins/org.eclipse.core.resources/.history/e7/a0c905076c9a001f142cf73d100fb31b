@@ -1,0 +1,5 @@
+package com.upgpaint.powerbi.rest.domain;
+
+public class MaterialRestList {
+
+}

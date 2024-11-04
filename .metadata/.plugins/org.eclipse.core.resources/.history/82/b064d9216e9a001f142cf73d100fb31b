@@ -1,0 +1,5 @@
+package com.upgpaint.powerbi.db.service.impl;
+
+public class MaterialDbServiceImpl {
+
+}

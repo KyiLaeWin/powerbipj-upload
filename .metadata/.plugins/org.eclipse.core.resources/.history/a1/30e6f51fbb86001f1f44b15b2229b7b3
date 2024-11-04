@@ -1,0 +1,100 @@
+package com.upgpaint.powerbi.db.service.impl;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import com.upgpaint.powerbi.db.entity.VBPAEntity;
+import com.upgpaint.powerbi.db.repository.VBPARepository;
+import com.upgpaint.powerbi.db.service.VBPADBService;
+import com.upgpaint.powerbi.rest.domain.VBPARest;
+import com.upgpaint.powerbi.rest.domain.VBPARestList;
+
+
+import jakarta.transaction.Transactional;
+
+@Service("vbpadbService")
+@Transactional
+public class VBPADbServiceImpl extends AbstractDbServiceManagerImpl<VBPAEntity,Long> implements VBPADBService{
+    private static final Logger log = LoggerFactory.getLogger(VBPADbServiceImpl.class);
+    private final VBPARepository vbpaRepository;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    
+    @Autowired
+    public VBPADbServiceImpl(@Qualifier("repository") VBPARepository vbpaRepository) {
+        super(vbpaRepository);
+        this.vbpaRepository = vbpaRepository;
+    }
+
+    @Override
+    public void createVBPA(VBPARestList vbpaRestList) {
+        List<VBPARest> vbpaRestData = vbpaRestList.getData().getResults();
+        LocalDate now = LocalDate.now();
+        LocalDate pastDate = now.minusDays(60);
+
+        // Step 1: Collect incoming billing documents
+        Set<Long> incomingBillingDocuments = new HashSet<>();
+        for (VBPARest vbpaRestItem : vbpaRestData) {
+            incomingBillingDocuments.add(Long.parseLong(vbpaRestItem.getBillingDocument()));
+        }
+
+        // Step 2: Delete records not in incoming data
+        List<VBPAEntity> existingVBPAs = vbpaRepository.findAll();
+
+        for (VBPAEntity existingVBPA : existingVBPAs) {
+            LocalDate billingDate = LocalDate.parse(existingVBPA.getBillingDate(), formatter);
+
+            if (!incomingBillingDocuments.contains(existingVBPA.getBillingDocument()) && billingDate.isAfter(pastDate)) {
+               vbpaRepository.DeleteByBillDOc(existingVBPA.getBillingDocument());
+                log.info("Deleted VBPA with billing document: {}", existingVBPA.getBillingDocument());
+            }
+        }
+
+       //  Step 3: Insert or update records
+        for (VBPARest vbpaRestItem : vbpaRestData) {
+            try {
+                Long billingDocument = Long.parseLong(vbpaRestItem.getBillingDocument());
+                VBPAEntity existingVBPA = vbpaRepository.findVBPA(billingDocument, vbpaRestItem.getPartner());
+
+                LocalDate billingDate = LocalDate.parse(vbpaRestItem.getBillingDate(), formatter);
+
+                if (existingVBPA == null) {
+                    // Insert new VBPA record
+                    VBPAEntity newEntity = new VBPAEntity();
+                    populateVBPA(newEntity, vbpaRestItem);
+                    this.save(newEntity);
+                    log.info("Inserted VBPA data with billing document: {}", vbpaRestItem.getBillingDocument());
+                } else if (billingDate.isAfter(pastDate)) {
+                    // Update existing VBPA record
+                	log.info("Updated VBPA data with billing document: {}", vbpaRestItem.getBillingDocument());
+                    populateVBPA(existingVBPA, vbpaRestItem);
+                    this.save(existingVBPA);
+                    
+                }
+            } catch (Exception e) {
+                log.error("Error processing VBPA with billing document: {}", vbpaRestItem.getBillingDocument(), e);
+            }
+        }
+    }
+
+  
+
+  
+    private void populateVBPA(VBPAEntity vbpaEntity, VBPARest vbpaRestItem) {
+        vbpaEntity.setBillingDocument(Long.parseLong(vbpaRestItem.getBillingDocument()));
+        vbpaEntity.setBillingDate(vbpaRestItem.getBillingDate());
+        vbpaEntity.setPartner(vbpaRestItem.getPartner());
+        vbpaEntity.setBusinessPartner(vbpaRestItem.getBusinessPartner());
+    }
+
+    @Override
+    public void removeVBPA(long billingDocument) {
+        vbpaRepository.DeleteByBillDOc(billingDocument);
+    }
+}

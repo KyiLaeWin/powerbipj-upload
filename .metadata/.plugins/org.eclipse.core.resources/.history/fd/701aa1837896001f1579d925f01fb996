@@ -1,0 +1,56 @@
+package com.upgpaint.powerbi.rest.domain;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class MMRest {
+	private static final Logger log = LoggerFactory.getLogger(MMRest.class);
+	
+	@JsonProperty("Material")
+	private String MaterialNumber;
+	@JsonProperty("Material_Description")
+	private String MaterialDesc;
+	@JsonProperty("Material_Type")
+	private String MaterialType;
+	@JsonProperty("Material_Grp")
+	private String MaterialGrp;
+	@JsonProperty("Brand")
+	private String Brand;
+	@JsonProperty("B_UOM")
+	private String BUOM;
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+}

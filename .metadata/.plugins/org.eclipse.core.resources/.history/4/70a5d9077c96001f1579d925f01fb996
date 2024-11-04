@@ -1,0 +1,23 @@
+package com.upgpaint.powerbi.service.impl;
+
+import java.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import com.upgpaint.powerbi.db.service.MMDBService;
+import com.upgpaint.powerbi.rest.domain.MMRestList;
+import com.upgpaint.powerbi.service.MMService;
+
+@service(mmservice)
+public class MMServiceImpl {
+
+}

@@ -1,0 +1,81 @@
+package com.upgpaint.powerbi.db.service.impl;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.upgpaint.powerbi.db.entity.SalesVolume;
+import com.upgpaint.powerbi.db.repository.SalesVolumeRepository;
+import com.upgpaint.powerbi.db.service.SalesVolumeDbService;
+import com.upgpaint.powerbi.rest.domain.SalesVolumeRest;
+import com.upgpaint.powerbi.rest.domain.SalesVolumeRestList;
+
+@Service("salesVolumeDbService")
+@Transactional
+public class SalesVolumeDbServiceImpl extends AbstractDbServiceManagerImpl<SalesVolume, Long> implements SalesVolumeDbService{
+private static Logger log = LoggerFactory.getLogger(SalesVolumeDbServiceImpl.class);
+
+   private SalesVolumeRepository salesVolumeRepository;
+
+   @Autowired
+   public SalesVolumeDbServiceImpl(@Qualifier("salesVolumeRepository") SalesVolumeRepository salesVolumeRepository) {
+        super(salesVolumeRepository);
+      this.salesVolumeRepository = salesVolumeRepository;
+   }
+
+	@Override
+	public void createSalesVolumeDetail(SalesVolumeRestList salesVolumeRestList) {
+		 List<SalesVolumeRest> salesVolumeRest = salesVolumeRestList.getData().getResults();
+		
+	        for (SalesVolumeRest salesVolumeRestItem : salesVolumeRest) {
+	            try {
+	            	// Add new SalesVolume
+               	 
+	            	SalesVolume searchSalesVolume = salesVolumeRepository.findSalesVolume(Long.parseLong(salesVolumeRestItem.getBill_Document()), salesVolumeRestItem.getMaterial(), 
+	            			salesVolumeRestItem.getVolume());
+	            	SalesVolume salesVolume=new SalesVolume();
+	                {
+	                	if(searchSalesVolume==null) {
+	                	salesVolume.setBillingDocument(Long.parseLong(salesVolumeRestItem.getBill_Document()));
+	                	salesVolume.setBillingCategory(salesVolumeRestItem.getBilling_Category());
+	                	salesVolume.setSalesGroup(salesVolumeRestItem.getSales_Group());
+	                	salesVolume.setSalesOffice(salesVolumeRestItem.getSales_Office());
+	                	salesVolume.setBillingDate(salesVolumeRestItem.getBilling_Date());
+	                	salesVolume.setRegion(salesVolumeRestItem.getRegion());
+	                	salesVolume.setDistChannel(salesVolumeRestItem.getDist_Channel());
+	                	salesVolume.setSalesOrg(salesVolumeRestItem.getSale_org());
+	                	salesVolume.setVolume(salesVolumeRestItem.getVolume());
+	                	salesVolume.setVolumeUnit(salesVolumeRestItem.getV_unit());
+	                	salesVolume.setMaterialNo(salesVolumeRestItem.getMaterial());
+	                	salesVolume.setPlant(salesVolumeRestItem.getPlant());
+	                	salesVolume.setPlantDesc(salesVolumeRestItem.getPlant_D());
+	                	salesVolume.setStorageLoc(salesVolumeRestItem.getStorage_loc());
+	                	salesVolume.setSelling_price(salesVolumeRestItem.getSelling_price());
+	                	salesVolume.setNet_Value(salesVolumeRestItem.getNet_Value());
+	                	salesVolume.setCsdPoint(salesVolumeRestItem.getcSD_point());
+	                	salesVolume.setRebateBasis(salesVolumeRestItem.getRebate_Basis());
+	                	salesVolume.setOutputTax(salesVolumeRestItem.getOutput_tax());
+	                this.save(salesVolume);
+
+	                log.info("Added new sales volume detail with Billing Document: {}", salesVolumeRestItem.getBill_Document());
+	                }else {
+	                	log.info("Already add Sales Volume Data");
+	                }
+	                }
+	            } catch (Exception e) {
+	                log.error("Exception in processing Sales Volume with Billing Document: {}", salesVolumeRestItem.getBill_Document(), e);
+	            }
+	        }
+	}
+
+	@Override
+	public void removeAllSalesVolumebyBillDov(Long billingDocument) {
+		// TODO Auto-generated method stub
+		salesVolumeRepository.RemoveSalesVolumeByBillDOc(billingDocument);
+	}
+}

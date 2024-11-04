@@ -1,0 +1,12 @@
+systemProp.javax.net.ssl.trustStore=/home/winlae/tools/jdk-19.0.2/lib/security/cacerts
+systemProp.javax.net.ssl.trustStorePassword=changeit
+googleGuavaVersion=31.1-jre
+c3p0Version=0.9.5.5
+mysqlConnectorVersion=8.0.32
+apacheHttpClientVersion=4.5.14
+orgJsonVersion=20230227
+testNGVersion=7.7.1
+openCsvVersion=5.7.1
+org.gradle.java.home=/usr/lib/jvm/java-19-openjdk-amd64
+org.gradle.jvmargs=-Xms512m -Xmx4096m -XX:MaxMetaspaceSize=512m
+

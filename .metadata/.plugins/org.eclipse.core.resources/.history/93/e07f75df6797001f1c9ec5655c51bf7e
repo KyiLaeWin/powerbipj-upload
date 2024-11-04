@@ -1,0 +1,65 @@
+plugins {
+    id "org.springframework.boot" version "3.1.0"
+    id 'io.spring.dependency-management' version '1.1.0'
+      id 'application'
+}
+
+repositories {
+    maven {
+        url "https://repo.maven.apache.org/maven2/"
+        allowInsecureProtocol = true
+          mavenCentral()
+    }
+}
+
+version = "1.0.0"
+
+bootRun {
+    jvmArgs = ["-Xms512m", "-Xmx2048m"]
+}
+// def javaHome = project.property('org.gradle.java.home')
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(19)
+        
+    }
+}
+
+application {
+    mainClass = 'com.upgpaint.powerbi.PowerBiMain'
+}
+tasks.named('test') {
+    useTestNG()
+}
+
+//tasks.withType(JavaCompile) {
+  //  options.forkOptions.javaHome = file(javaHome)
+//}
+//sourceCompatibility = '19'
+//targetCompatibility = '19'
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.0'
+    implementation 'commons-cli:commons-cli:1.4'
+    implementation "com.google.guava:guava:${googleGuavaVersion}"
+    
+    implementation 'org.apache.poi:poi-ooxml:5.2.3' 
+
+	implementation "com.mchange:c3p0:${c3p0Version}"
+    runtimeOnly "com.h2database:h2"
+    runtimeOnly "mysql:mysql-connector-java:${mysqlConnectorVersion}"
+
+    implementation "org.apache.httpcomponents:httpclient:${apacheHttpClientVersion}"
+    implementation "org.json:json:${orgJsonVersion}"
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.testng:testng:${testNGVersion}"
+    testImplementation "com.opencsv:opencsv:${openCsvVersion}"
+    
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+}
